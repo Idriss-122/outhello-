@@ -1,0 +1,200 @@
+================================================================================
+EXPLICATION DES FONCTIONS - OTHELLO AVEC ALGORITHME MINMAX
+================================================================================
+
+STRUCTURES DE BASE
+================================================================================
+
+1. ENUM Cell
+   - EMPTY: Case vide
+   - BLACK: Disque noir
+   - WHITE: Disque blanc
+   - fromPlayer(Player p): Convertit un joueur en couleur de disque
+
+2. ENUM Player
+   - BLACK: Joueur noir
+   - WHITE: Joueur blanc
+   - opposite(): Retourne le joueur opposé
+
+3. CLASSE Move
+   - row: Ligne (0-7)
+   - col: Colonne (0-7)
+   - Représente une position sur le plateau
+
+4. CLASSE Board
+   - Représente l'état du plateau de jeu 8x8
+   - grid[][]: Matrice 8x8 contenant les Cell
+
+   MÉTHODES DE Board:
+   
+   - Board(): Constructeur initialisant le plateau avec la position de départ
+     (4 disques au centre: blancs en (3,3) et (4,4), noirs en (3,4) et (4,3))
+   
+   - Board(Board other): Constructeur de copie pour créer un nouvel état
+   
+   - inBounds(int r, int c): Vérifie si les coordonnées sont dans les limites
+   
+   - at(int r, int c): Retourne le contenu de la case (r, c)
+   
+   - count(Player p): Compte le nombre de disques du joueur p
+   
+   - getLegalMoves(Player p): Retourne la liste des coups légaux pour le joueur p
+     Un coup est légal s'il permet de capturer au moins un disque adverse
+   
+   - hasAnyMoves(Player p): Vérifie si le joueur p a au moins un coup légal
+   
+   - applyMove(Player p, Move move): Applique le coup du joueur p à la position move
+     Retourne le nombre de disques retournés, ou 0 si le coup est illégal
+   
+   - canFlip(Player p, int row, int col): Vérifie si placer un disque en (row, col)
+     permet de capturer des disques adverses
+   
+   - flipDirection(Player p, int row, int col, int dr, int dc, boolean performFlip):
+     Vérifie/compte les disques capturables dans une direction (dr, dc)
+     Si performFlip=true, retourne effectivement les disques
+   
+   - isTerminal(): Vérifie si l'état est terminal (aucun joueur ne peut jouer)
+
+
+ALGORITHME MINMAX
+================================================================================
+
+5. FONCTION Max(Board board, Player ai, int depth)
+   
+   DESCRIPTION:
+
+   Le joueur Max (ai) cherche à maximiser son gain.
+   
+   PARAMÈTRES:
+   - board: État actuel du plateau (nœud n)
+   - ai: Joueur AI qui joue le rôle de Max
+   - depth: Profondeur restante (np)
+   
+   ALGORITHME:
+   1. Générer les successeurs: obtenir tous les coups légaux pour Max
+   2. Si depth == 0 ou état terminal: retourner V(n) (valeur heuristique)
+   3. Si pas de coups légaux: passer le tour (appeler Min avec l'adversaire)
+   4. Initialiser maximum = -∞
+   5. Pour chaque successeur n_i:
+      - Créer un nouvel état en appliquant le coup
+      - t = Min(n_i) (appel récursif)
+      - Si t > maximum, alors maximum = t
+   6. Retourner maximum
+   
+   RETOUR:
+   La valeur maximale que Max peut obtenir depuis cet état.
+
+
+6. FONCTION Min(Board board, Player ai, int depth)
+   
+   DESCRIPTION:
+
+   Le joueur Min (adversaire de ai) cherche à minimiser le gain de Max.
+   
+   PARAMÈTRES:
+   - board: État actuel du plateau (nœud n)
+   - ai: Joueur AI (Max) - Min minimise le gain de Max
+   - depth: Profondeur restante (np)
+   
+   ALGORITHME:
+   1. Générer les successeurs: obtenir tous les coups légaux pour Min
+   2. Si depth == 0 ou état terminal: retourner V(n) (valeur heuristique)
+   3. Si pas de coups légaux: passer le tour (appeler Max avec l'adversaire)
+   4. Initialiser minimum = +∞
+   5. Pour chaque successeur n_i:
+      - Créer un nouvel état en appliquant le coup
+      - t = Max(n_i) (appel récursif)
+      - Si t < minimum, alors minimum = t
+   6. Retourner minimum
+   
+   RETOUR:
+   La valeur minimale que Min peut forcer depuis cet état (minimise le gain de Max).
+
+
+7. FONCTION V(Board board, Player ai)
+   
+   DESCRIPTION:
+   Fonction heuristique V(n) qui évalue l'état du plateau pour le joueur AI (Max).
+   Cette fonction est appelée aux nœuds feuilles (depth == 0) ou aux états terminaux.
+   
+   PARAMÈTRES:
+   - board: État du plateau à évaluer
+   - ai: Joueur AI (Max) pour lequel on calcule le gain
+   
+   CALCUL:
+   La fonction combine trois critères:
+   1. Différence de disques: (disques_ai - disques_adversaire) * 10
+      Plus on a de disques, mieux c'est
+   
+   2. Mobilité: (coups_possibles_ai - coups_possibles_adversaire) * 5
+      Avoir plus de coups possibles est avantageux
+   
+   3. Coins: +25 pour chaque coin possédé par ai, -25 pour chaque coin adverse
+      Les coins sont des positions stratégiques très importantes
+   
+   RETOUR:
+   Valeur heuristique (gain estimé) pour le joueur ai.
+   Plus la valeur est élevée, meilleur est l'état pour ai.
+
+
+8. FONCTION chooseBestMove(Board board, Player ai, int depth)
+   
+   DESCRIPTION:
+   Choisit le meilleur coup pour l'IA en utilisant l'algorithme MinMax.
+   Cette fonction est appelée au niveau racine pour sélectionner le coup à jouer.
+   
+   PARAMÈTRES:
+   - board: État actuel du plateau
+   - ai: Joueur AI (Max)
+   - depth: Profondeur de recherche (np)
+   
+   ALGORITHME:
+   1. Obtenir tous les coups légaux pour ai
+   2. Si aucun coup possible, retourner null
+   3. Initialiser best = premier coup, bestScore = -∞
+   4. Pour chaque coup possible:
+      - Créer un nouvel état en appliquant le coup
+      - score = Min(état_suivant) (appeler Min car c'est au tour de l'adversaire)
+      - Si score > bestScore, mettre à jour best et bestScore
+   5. Retourner le meilleur coup
+   
+   RETOUR:
+   Le meilleur coup à jouer selon l'algorithme MinMax.
+
+
+FONCTION PRINCIPALE
+================================================================================
+
+9. FONCTION main(String[] args)
+   
+   DESCRIPTION:
+   Point d'entrée du programme. Gère le déroulement de la partie.
+   
+   ALGORITHME:
+   1. Demander le mode de jeu (Human vs Human ou Human vs Computer)
+   2. Si mode Computer, demander la profondeur (np) et le côté de l'IA
+   3. Initialiser le plateau et commencer avec le joueur noir
+   4. Boucle principale:
+      - Vérifier si l'état est terminal (fin de partie)
+      - Obtenir les coups légaux du joueur actuel
+      - Si aucun coup, passer le tour
+      - Si c'est l'IA, utiliser chooseBestMove()
+      - Sinon, laisser l'humain choisir (simplifié: premier coup)
+      - Appliquer le coup et changer de joueur
+   5. Afficher le résultat final
+
+
+PRINCIPE DE L'ALGORITHME MINMAX
+================================================================================
+
+L'algorithme MinMax explore l'arbre de jeu jusqu'à une profondeur donnée (np).
+À chaque niveau:
+- Les nœuds Max choisissent le maximum parmi leurs successeurs
+- Les nœuds Min choisissent le minimum parmi leurs successeurs
+
+Cela permet à Max de choisir le coup qui maximise son gain, en supposant que Min
+jouera de manière optimale pour minimiser le gain de Max.
+
+La fonction V(n) est utilisée pour évaluer les nœuds feuilles (profondeur 0)
+ou les états terminaux, donnant une estimation du gain pour Max.
+
