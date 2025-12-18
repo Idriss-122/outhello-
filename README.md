@@ -4,4 +4,4 @@ J'ai téléchargé le projet dans ce dépôt, avec quelques captures d'écran po
 
 <img width="1907" height="1021" alt="image" src="https://github.com/user-attachments/assets/45401baf-7c6c-41af-a902-d0001deb7b3a" />
 
-<img width="1913" height="1021" alt="image" src="https://github.com/user-attachments/assets/d08a7e08-f574-43c6-9476-f85d2ea5c6df" />
+Les principales fonctions du projet sont expliquées dans le fichier joint Explication_Projet.txt.
